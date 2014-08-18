@@ -1,0 +1,69 @@
+- if (action == "/addService")
+    h1 Add Service
+- else
+    h1 Edit Service
+    
+p 
+    = "Services are categories of health checks. Interval specifies how often we write history to the database."
+
+form(method="post", action=action)
+    table
+        tr
+            td.label-column
+                label(for="name") Service Name: 
+            td.input-column
+                input(type="text", id="name", name="name", value=service.name)
+        tr
+            td.label-column
+                label(for="app_server") Application Server: 
+            td.input-column
+                textarea#app_server.autoresize(rows="1", cols="40", name="app_server")= service.app_server
+        tr
+            td.label-column
+                label(for="app_server_url") Server URL: 
+            td.input-column
+                textarea#app_server_url.autoresize(rows="1", cols="40", name="app_server_url")= service.app_server_url
+        tr
+            td.label-column
+                label(for="db_user") DB User: 
+            td.input-column
+                textarea#db_user.autoresize(rows="1", cols="40", name="db_user")= service.db_user
+        tr
+            td.label-column
+                label(for="db_port") DB port: 
+            td.input-column
+                textarea#db_port.autoresize(rows="1", cols="40", name="db_port")= service.db_port
+        tr
+            td.label-column
+                label(for="interval") Interval (s): 
+            td.input-column
+                input(type="text", id="interval", name="interval",value=service.interval)
+                
+        tr
+            td.label-column
+                label(for="contacts") Contacts(emails or phone numbers):
+            td.input-column
+                textarea#contacts.autoresize(rows="1", cols="40", name="contacts")= service.contacts
+                
+    input(type="hidden", name="id", value=service.id)
+    input(type="hidden", name="timeCreated", value=service.timeCreated)
+    input(type="submit", name="submit", onclick="return validateServiceCreation();");
+
+!=partial('nav_bar')
+
+script(type='text/javascript')    
+    function validateServiceCreation() {
+        var name = $("#name").val();
+        var interval = parseInt($("#interval").val());
+        if (name == "" || name === undefined) {
+            showAlert("Please input a name for the new service.");
+            return false;
+        }
+        
+        if (isNaN(interval) || interval == "" || interval === undefined || interval < 30) {
+            showAlert("Please input an interval(s) greater than 30s.")
+            return false;
+        }
+        
+        return true;
+    }

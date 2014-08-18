@@ -1,0 +1,95 @@
+h1 Failed History
+
+!=partial('nav_bar')
+
+table.healthDashboard(id="sortableTable")
+    thead
+        tr
+            th(title="click here to sort") State
+            th(title="click here to sort") Service
+            th(title="click here to sort") Name
+            th(title="click here to sort") Type
+            th 
+                ="Errors"
+            th
+                image#expandAlldetails.arrow(src="images/plus.png")
+            th(width = "140px",title="click here to sort") Last Updated
+    tbody
+        - each serviceState in serviceStates
+            - if (serviceState.state == 2)
+                - var type = "master"
+            - else
+                - type = undefined
+            
+            tr.hoverable(class=type)
+                td
+                    - if (serviceState.state == 2)
+                        image(value=serviceState.state,class="status_image", src="images/error.png")
+                    - else if (serviceState.state == -1)
+                        image(value=serviceState.state,class="status_image", src="images/disabled.png")
+                    - else
+                        image(value=serviceState.state,class="status_image", src="images/success.png")
+                td 
+                    a(value=serviceState.service_name,href='/viewServiceChecks?service_id='+serviceState.service_id)= serviceState.service_name
+                td
+                    a(value=serviceState.name,href="viewCheck?service_id=" + serviceState.service_id + "&id=" + serviceState.check_id)= serviceState.name
+                td= serviceState.displayCheckType
+                td
+                    = serviceState.short_details
+                td
+                    - if (serviceState.state == 2)
+                        image(class="arrow", src="images/plus.png")     
+            
+                td= serviceState.formattedLastReceived
+            tr.details
+                td(colspan="100")
+                    != serviceState.details  
+                    
+// Display pagination controls for service History
+- var previous;
+- if (page && page != 0)
+    - previous = page-1;
+- else
+    - previous = 0;
+    - page = 0;
+- var url = '/viewFailedHistory'
+
+// Display pagination controls for service History
+a(href= url + "?page=#{0}") First
+= " - "
+- if(page > 0)
+    a(href= url + "?page=#{previous}") Prev - 
+b 
+    a(href= url + "?page=#{page}")= page
+- if(hasNext == true)
+    - var next = page-1+2;
+    = " - "
+    a(href= url + "?page=#{next}") Next
+    //a(href= url + "&page=#{totalPages-1}") Last
+
+
+br
+- if (history)
+    a(href="/healthDashboard") Health Dashboard
+- else
+    a(href="/viewService?action=add") Add Service
+    = " - "
+    a(href="/viewCheck?action=add") Add Health Check
+= " - "
+a(href="/viewTemplates") Manage Templates
+    
+script(type='text/javascript')
+    var TSort_Data = new Array ('sortableTable', 'i', 's', 's', 's','','','d');
+    tsRegister();
+    window.onload = function addRefresh() {
+        var meta;
+        if (document.createElement && (meta = document.createElement('meta'))) {
+            // set properties
+            meta.httpEquiv = "Refresh";
+            meta.content = "30"; // Set Refresh Interval in seconds
+
+            // now add the meta element to the head
+            document.getElementsByTagName('head').item(0).appendChild(meta);
+        }
+    }
+

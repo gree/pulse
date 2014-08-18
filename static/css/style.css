@@ -1,0 +1,112 @@
+body {
+    font-family: "Lucida Grande", "Lucida", "sans-serif"; 
+    font-size: 12px;
+    text-align: center;
+    }
+    
+a {text-decoration: none;}
+
+#container {
+    margin: 0px auto;
+    padding:15px;
+    text-align: left}
+
+label {font-weight: bold;}
+
+#navbar {
+    font-weight: bold;
+}
+
+.status_image {
+    width: 16px;
+    height: 16px;
+    text-align: center;
+}
+
+.arrow {
+    width: 16px;
+    height: 16px;
+}
+
+td.label-column {
+    text-align: right;
+}
+
+td.input-column {
+    text-align: left;
+}
+
+#alertbar {
+    text-align: center;
+    width: 500px; 
+    height: 30px;
+    background-color: #EEDC82;
+    border-style: solid; 
+    border-color: #EEC900; 
+    border-width: 3px; 
+    display: none}
+
+table {border-collapse: collapse;}
+table.healthDashboard {width: 100%; text-align: left; }
+.healthDashboard th {background-color: #A4D3EE; border-bottom: 2px solid #4A708B; padding-top: 3px; padding-bottom: 3px;}
+.healthDashboard tr {border-bottom: 1px solid #8DB6CD;}
+.healthDashboard tr:nth-child(4n+3) { background-color: #ddd;}
+.healthDashboard tr:nth-child(4n-3) { background-color: #eee;}
+.healthDashboard tr.hoverable:hover {background-color: #ffdc87;}
+
+table.healthChecks  {width: 100%; text-align: left;}
+.healthChecks th {background-color: #A4D3EE; border-bottom: 2px solid #4A708B; padding-top: 3px; padding-bottom: 3px;}
+.healthChecks tr:nth-child(4n+3) {background-color: #ddd;border-bottom: 1px solid #8DB6CD;}
+.healthChecks tr:nth-child(4n-3) {background-color: #eee;border-bottom: 1px solid #8DB6CD;}
+.healthChecks tr.hoverable:hover {background-color: #ffdc87;}
+
+.details {display: none; background-color: #fff; text-align: left;}
+.details tr {border-bottom: none;}
+.details td { padding: 20px;}
+
+table.services  {width: 100%; text-align: left;}
+.services th {background-color: #A4D3EE; border-bottom: 2px solid #4A708B; padding-top: 3px; padding-bottom: 3px;}
+.services tr {border-bottom: 1px solid #8DB6CD;}
+.services tr:nth-child(4n+3) { background-color:#ddd;}
+.services tr:nth-child(4n-3) { background-color:#eee;}
+.services tr.hoverable:hover {background-color: #ffdc87;}
+
+.HealthCheckForm td {padding: 5px;}
+
+.Template td {padding: 5px;}
+
+ul.tabs {
+    height: 19px;
+    border-bottom: 1px solid #B6B6B6;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 12px 0 0 10px;
+}
+
+ul.tabs li {
+    float: left;
+    list-style: none;
+}
+
+ul.tabs a {
+    position: relative;
+    margin: 0 5px 0 0;
+    padding: 3px 10px;
+    background: #F8FBFF;
+    border: 1px solid #B6B6B6;
+    text-decoration: none;
+    outline: 0;
+    top: 1px;
+}
+
+ul.tabs a.current {
+    background: white;
+    border-bottom-color: white;
+}
+
+a {
+    color: #000098;
+    text-decoration: none;
+    outline: 0;
+    cursor: pointer;
+}

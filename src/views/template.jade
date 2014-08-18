@@ -1,0 +1,211 @@
+h1 Templates
+
+!=partial('nav_bar')
+
+form(method="post", action="/addTemplate")
+    table.HealthCheckForm
+        thead
+            tr
+                td(class='label-column')
+                    label(for="subject") Templates
+                td(class='input-column')
+                    select#templates(name="id")
+                        option(value=0, selected="true") New Template
+                        - for(var x in templates)
+                            option(value=templates[x].id)=templates[x].name
+            tr
+                td(class='label-column')
+                    label(for="subject") Type
+                td(class='input-column')
+                    select#template_type(name="type")
+            tr
+                td(class='label-column')
+                    label(for="subject") Name
+                td(class='input-column')
+                    input#template_name(class="autoresize", rows="1", cols="100", name="name")
+            tr
+                td(class='label-column')
+                    label#template_subject_label(for="subject") Subject
+                td(class='input-column')
+                    textarea#template_subject(class="autoresize", rows="1", cols="100", name="subject")
+            tr
+                td(class='label-column')
+                    label(for="body") Parameters
+                td
+                    select#parameters(name="parameters")
+                        - for(var x in parameters)
+                            option(value=parameters[x])= parameters[x]
+                    input#insert_subject(type="button", name="insert_subject", value="Insert in Subject", onclick="addParameters('#template_subject');");
+                    input#insert_body(type="button", name="insert_body", value="Insert in Body", onclick="addParameters('#template_body');");
+            tr
+                td(class='label-column')
+                    label(for="body") Body
+                td(class='input-column')
+                    textarea#template_body(class="autoresize", rows="1", cols="100", name="body")
+    input#user_action(type="hidden", name="action", value="add")
+    input#submit_button(type="button", name="submit", value="Submit", onclick="return validateFields();");
+    
+script(type='text/javascript')
+    var unsortedTemplates = !{unsortedStringTemplates};
+    var sortedTemplates = !{sortedStringTemplates};
+    var template_types = !{templateTypes};
+    
+    function addParameters(template_to){
+        var body = $(template_to);
+        var myValue = " { " + $('#parameters').val()+  " } ";
+        var startPos = body[0].selectionStart;
+        var endPos = body[0].selectionEnd;
+        var scrollTop = body[0].scrollTop;
+        body[0].value = body[0].value.substring(0, startPos) + myValue + body[0].value.substring(endPos,body[0].value.length);
+        body[0].focus();
+        body[0].selectionStart = startPos + myValue.length;
+        body[0].selectionEnd = startPos + myValue.length;
+        body[0].scrollTop = scrollTop;
+    }    
+    
+    function reloadTemplates(template_id){
+        $('#templates').find('option').remove().end();
+        var option = $('<option></option>').attr('value',0).text("New Template");
+        $('#templates').append(option);
+        for(var x in sortedTemplates){
+            option = $('<option></option>').attr('value',sortedTemplates[x].id).text(sortedTemplates[x].name);
+            if(sortedTemplates[x].id == template_id){
+                option.attr('selected',true);
+            }
+            $('#templates').append(option);
+        }
+        $('#templates').change();
+    }
+    reloadTemplateType();
+    function reloadTemplateType(template_type){
+        $('#template_type').find('option').remove().end();
+        if(template_type){
+            var option = $('<option></option>').attr('value',template_type).text(template_type);
+            option.attr('selected',true);
+            $('#template_type').append(option);
+            
+        }
+        else{
+            for(var x in template_types){
+                var option = $('<option></option>').attr('value',template_types[x]).text(template_types[x]);
+                $('#template_type').append(option);
+            }
+        }
+        
+        $('#template_type').change();
+    }
+    
+    $('#templates').change(function () {
+        var template_id = $('#templates').val();
+        hideAlert();
+        if(template_id != 0){
+            var template = unsortedTemplates[template_id];
+            reloadTemplateType(template.type);
+            $('#template_type').attr('disabled', true);
+            $('#template_name').val(template.name);
+            $('#template_name').autoResize();
+            $('#template_subject').val(template.subject);
+            $('#template_subject').autoResize();
+            $('#template_body').val(template.body);
+            $('#template_body').autoResize();
+            $('#user_action').val('edit');
+        }
+        else{
+            reloadTemplateType();
+            $('#template_type').attr('disabled', false);
+            $('#template_name').val('');
+            $('#template_subject').val('');
+            $('#template_body').val('');
+            $('#user_action').val('add');
+        }
+        
+    });
+    
+    $('#template_type').change(function () {
+        if($('#template_type').val() == "SmsTemplate"){
+            $('#template_subject').hide();
+            $('#template_subject_label').hide();
+            $('#insert_subject').hide();
+        }
+        else{
+            $('#template_subject').show();
+            $('#template_subject_label').show();
+            $('#insert_subject').show();
+        }
+    });
+    
+    $('#template_body').keydown(function (e) {
+        if (e.keyCode == 9) {
+            var myValue = "\t";
+            var startPos = this.selectionStart;
+            var endPos = this.selectionEnd;
+            var scrollTop = this.scrollTop;
+            this.value = this.value.substring(0, startPos) + myValue + this.value.substring(endPos,this.value.length);
+            this.focus();
+            this.selectionStart = startPos + myValue.length;
+            this.selectionEnd = startPos + myValue.length;
+            this.scrollTop = scrollTop;
+            e.preventDefault();
+        }
+    });
+    
+    $('#parameters').change(function () {
+        if(this.value != "HEALTHCHECK_NAME" && this.value != "SERVICE_NAME"){
+            $('#insert_subject').attr('disabled',true);
+        }
+        else{
+            $('#insert_subject').attr('disabled',false);
+        }
+    });
+    
+    function validateFields(){
+        if($('#template_name').val() == ""){
+            showAlert('Template name is required');
+            return false;
+        }
+        if($('#template_type').val() == "EmailTemplate"){
+            if($('#template_subject').val() == ""){
+                showAlert('Template subject is required');
+                return false;
+            }
+        }
+        if($('#template_body').val() == ""){
+            showAlert('Template body is required');
+            return false;
+        }
+        if($('#template_type').val() == "SmsTemplate"){
+            if($('#template_body').val().length > 100 && $('#template_body').val().length < 160){
+                if(!confirm('The template is over a 100 chars, the actual sms might exceed 160 chars, Do you still want to save it?')){
+                    return false;
+                }
+            }
+            if($('#template_body').val().length > 160){
+                showAlert('sms size cannot exceed 160 chars');
+                return false;
+            }
+        }
+        var action = $('#user_action').val();
+        var output = jQuery.ajax({
+            url:    'http://localhost/addTemplate',
+            type: 'POST',
+            data: '&action='+action+'&id='+$('#templates').val()+'&type='+$('#template_type').val()
+                   +'&name='+$('#template_name').val() + '&subject='+$('#template_subject').val()
+                   + '&body='+$('#template_body').val(),
+            async:   false
+        }).responseText;
+        unsortedTemplates = JSON.parse(output)['templates'];
+        sortedTemplates = JSON.parse(output)['sortedTemplates'];
+        var template_id = JSON.parse(output)['template_id'];
+        reloadTemplates(template_id);
+        if(!template_id){
+            showAlert(action + " unsuccesssful");
+        }
+        if(action == "add"){
+            showAlert("New Template Added");
+        }
+        else if(action == "edit"){
+            showAlert("Template Edited");
+        }
+    }
+    
+    

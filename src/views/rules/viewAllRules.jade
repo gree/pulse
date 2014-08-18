@@ -1,0 +1,33 @@
+table#rules
+  thead
+    tr
+      th Rule Type
+      th Rule Value
+      th Time Created
+      th Time Modified
+      th
+      th
+  tbody
+    - each rule in rules
+      tr
+         td= rule.ruleName
+         td= rule.value
+         td= rule.timeCreated.toLocaleDateString()+ " " + rule.timeCreated.toLocaleTimeString()
+         td= rule.timeModified.toLocaleDateString()+ " " + rule.timeModified.toLocaleTimeString()
+         td
+              form(method="post",action="/viewRule")
+                input(type="hidden",value=rule.id, name="id");
+                input(type="hidden",value=rule.service_id,name="service_id");
+                input(type="hidden",value=rule.timeCreated,name="timeCreated");
+                input(type="hidden",value=rule.timeModified,name="timeModified");
+                input(type="hidden",value=rule.ruleType,name="ruleType");
+                input(type="hidden",value=rule.ruleName,name="ruleName");
+                input(type="hidden",value=rule.value,name="ruleValue");
+                input(type="submit",value="Edit")
+         td 
+              form(method="post",action="/removeRule")
+                input(type="hidden",value=rule.id, name="id");
+                input(type="hidden",value=rule.service_id,name="service_id");
+                input(type="submit",value="Delete")
+
+a(href="/healthDashboard") Health Dashboard

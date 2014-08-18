@@ -1,0 +1,86 @@
+h1 Health Checks - #{service_name} 
+
+!=partial('nav_bar')
+
+table.healthChecks(id="sortableTable")
+    thead
+        tr
+            th(title="click here to sort") State
+            th(title="click here to sort") Service
+            th(title="click here to sort") Name
+            th(title="click here to sort") Type
+            th Period (s)
+            th Value
+            th Errors
+            th(width = "140px",title="click here to sort") Time Created
+            th(width = "140px",title="click here to sort") Time Modified
+            th(width = "50px")
+            th(width = "70px")
+            th History
+    tbody
+        - each healthCheck in checks 
+            tr.master.hoverable
+                td
+                    - if (healthCheck.state == 2)
+                        image(value=healthCheck.state,class="status_image",  src="images/error.png")
+                    - else if (healthCheck.state == -1)
+                        image(value=healthCheck.state,class="status_image", src="images/disabled.png")
+                    - else
+                        image(value=healthCheck.state,class="status_image", src="images/success.png")
+                td
+                    a(value =healthCheck.service_name, href="/viewServiceChecks?service_id=" + healthCheck.service_id)= healthCheck.service_name
+                td
+                    a(value =healthCheck.name,  href="viewCheck?service_id=" + healthCheck.service_id + "&id=" + healthCheck.check_id)= healthCheck.name
+                td= healthCheck.displayCheckType
+                td= healthCheck.formattedPeriod
+                td= healthCheck.value
+                td
+                    image(class="arrow", src="images/plus.png")  
+                td= healthCheck.formattedTimeCreated
+                td= healthCheck.formattedTimeModified
+                td
+                    form(method="post", action="/viewCheck") 
+                        input(type="hidden",value=healthCheck.check_id, name="id");
+                        input(type="hidden",value=healthCheck.service_id, name="service_id");
+                        input(type="submit",value="Edit");
+                td 
+                    form(method="post", action="/editCheck") 
+                        input(type="hidden", name="id", value=healthCheck.check_id);
+                        input(type="hidden", name="action", value="remove");
+                        input#referrer(type="hidden", name="referrer", value=referrer);
+                        input(type="hidden", name="service_id", value=healthCheck.service_id);
+                        - if (healthCheck.state != -1)
+                            - var buttonValue="Disable"
+                        - else
+                            - var buttonValue="Enable"
+                        - if (services[healthCheck.service_id].status != "disabled")
+                            - var disabledbutton = undefined
+                        - else
+                            - var disabledbutton = "disabled"
+                        input(type="submit", value=buttonValue, disabled=disabledbutton, onClick="return confirm('Are you sure you want to #{buttonValue} the check #{healthCheck.name}?');")
+                td 
+                        a(href='/viewServiceHistory?service_id=' + healthCheck.service_id + '&check_id=' + healthCheck.check_id + '&state=2') History
+            tr.details
+                td(colspan="100")!= healthCheck.details
+
+br
+- if (service_id)
+    a(href="/viewCheck?action=add&service_id=" + service_id) Add Health Check
+- else
+    a(href="/viewCheck?action=add") Add Health Check
+= " - "
+a(href="/viewTemplates") Manage Templates    
+script(type='text/javascript')
+    var TSort_Data = new Array ('sortableTable', 'i', 's', 's', 's','','','','d','d');
+    tsRegister();
+    window.onload = function addRefresh() {
+        var meta;
+        if (document.createElement && (meta = document.createElement('meta'))) {
+            // set properties
+            meta.httpEquiv = "Refresh";
+            meta.content = "30"; // Set Refresh Interval in seconds
+
+            // now add the meta element to the head
+            document.getElementsByTagName('head').item(0).appendChild(meta);
+        }
+    }

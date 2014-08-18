@@ -1,0 +1,156 @@
+- if (!history)
+    h1 Health Dashboard - #{service_name}
+    //- each service in services TODO - jlw
+    //    a(href='/healthDashboard?service_id='+service.id)= service.name
+    //    br
+- else    
+    h1 Service History - #{service_name}
+
+!=partial('nav_bar')
+
+- if (history)
+    // Display tabs for history
+    - var tabUrl = '/viewServiceHistory'
+    - var tabClass = stateStatus != 2 ? 'current' : '';
+    - var failedTabClass = stateStatus == 2 ? 'current' : '';
+
+    - if (service_id)
+        - tabUrl = tabUrl + "?service_id=" + service_id
+        - if (check_id)
+            - tabUrl = tabUrl + "&check_id=" + check_id
+    - var failedTabUrl = tabUrl + "&state=2";
+
+    ul(class="tabs")
+        li(width="200px",  class="history_tab")
+            a(href=failedTabUrl, class=failedTabClass) View Failed History
+        li(width="200px", class="history_tab")
+            a(href=tabUrl, class=tabClass) View All History
+
+table.healthDashboard(id="sortableTable")
+    thead
+        tr
+            th(title="click here to sort") State
+            th(title="click here to sort") Service
+            th(title="click here to sort") Name
+            th(title="click here to sort") Type
+            th 
+                ="Errors"
+            th
+                image#expandAlldetails.arrow(src="images/plus.png")
+            th(width = "140px",title="click here to sort") Last Updated
+            th(width = "70px")
+            - if (!history)
+                th
+                    image(class="status_image", src="images/reload.png")
+                th(width = "60px") History
+    tbody
+        - each serviceState in serviceStates
+            - if (serviceState.state == 2)
+                - var type = "master"
+            - else
+                - type = undefined
+            
+            tr.hoverable(class=type)
+                td
+                    - if (serviceState.state == 2)
+                        image(value=serviceState.state,class="status_image", src="images/error.png")
+                    - else if (serviceState.state == -1)
+                        image(value=serviceState.state,class="status_image", src="images/disabled.png")
+                    - else
+                        image(value=serviceState.state,class="status_image", src="images/success.png")
+                td 
+                    a(value=serviceState.service_name,href='/viewServiceChecks?service_id='+serviceState.service_id)= serviceState.service_name
+                td
+                    a(value=serviceState.name,href="viewCheck?service_id=" + serviceState.service_id + "&id=" + serviceState.check_id)= serviceState.name
+                td= serviceState.displayCheckType
+                td
+                    = serviceState.short_details
+                td
+                    - if (serviceState.state == 2)
+                        image(class="arrow", src="images/plus.png")     
+            
+                td= serviceState.formattedLastReceived
+                td
+                    form(method="post", action="/editCheck")
+                        input(type="hidden", name="id", value=serviceState.check_id);
+                        input(type="hidden", name="action", value="remove");
+                        input#referrer(type="hidden", name="referrer", value=referrer);
+                        input(type="hidden", name="service_id", value=serviceState.service_id);
+                        - if (serviceState.state != -1)
+                            - var buttonValue="Disable"
+                        - else
+                            - var buttonValue="Enable"
+                        - if (services[serviceState.service_id].status != "disabled")
+                            - var disabledbutton = undefined
+                        - else
+                            - var disabledbutton = "disabled"
+                        input(type="submit", value=buttonValue, disabled=disabledbutton, onClick="return confirm('Are you sure you want to #{buttonValue} the check #{serviceState.name}?');")
+                - if (!history)
+                    td
+                        - if (serviceState.state != -1)
+                            a(href='/restartHealthCheck?check_id=' + serviceState.check_id, onClick='return confirm("Are you sure you want to restart health check '+ serviceState.name + '?");')
+                                image#restart_image(class="status_image", src="images/reload.png", title="click to re-run health check")
+                        - else
+                            image#restart_image(class="status_image", src="images/reload.png",title="cannot re-run a disabled health check")
+                    td 
+                        a(href='/viewServiceHistory?service_id=' + serviceState.service_id + '&check_id=' + serviceState.check_id + '&state=2') History
+                        
+            tr.details
+                td(colspan="100")
+                    != serviceState.details  
+                    
+- if (history)
+    // Display pagination controls for service History
+    - var previous;
+    - if (page && page != 0)
+        - previous = page-1;
+    - else
+        - previous = 0;
+        - page = 0;
+    - var url = '/viewServiceHistory'
+
+    - if (service_id)
+        - url = url + "?service_id=" + service_id
+        - if (check_id)
+            - url = url + "&check_id=" + check_id
+        - if (stateStatus)
+            - url = url + "&state=" + stateStatus
+    // Display pagination controls for service History
+    a(href= url + "&page=#{0}") First
+    = " - "
+    - if(page > 0)
+        a(href= url + "&page=#{previous}") Prev - 
+    b 
+        a(href= url + "&page=#{page}")= page
+    - if(hasNext == true)
+        - var next = page-1+2;
+        = " - "
+        a(href= url + "&page=#{next}") Next
+        //a(href= url + "&page=#{totalPages-1}") Last
+
+
+br
+- if (history)
+    a(href="/healthDashboard") Health Dashboard
+- else
+    a(href="/viewService?action=add") Add Service
+    = " - "
+    a(href="/viewCheck?action=add") Add Health Check
+= " - "
+a(href="/viewTemplates") Manage Templates
+    
+script(type='text/javascript')
+    var TSort_Data = new Array ('sortableTable', 'i', 's', 's', 's','','','d');
+    tsRegister();
+    window.onload = function addRefresh() {
+        var meta;
+        if (document.createElement && (meta = document.createElement('meta'))) {
+            // set properties
+            meta.httpEquiv = "Refresh";
+            meta.content = "30"; // Set Refresh Interval in seconds
+
+            // now add the meta element to the head
+            document.getElementsByTagName('head').item(0).appendChild(meta);
+        }
+    }
+

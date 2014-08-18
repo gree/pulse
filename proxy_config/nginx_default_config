@@ -1,0 +1,16 @@
+# This is the nginx default config in order for healthcheck dashboard and service registry works together 
+# Nginx listens to port 80
+# healthDashboard listens to port 9000 and serviceRegistry listens to port 10000 
+#
+server {
+    listen      80 default_server;
+    server_name  _;
+
+    location / {
+    proxy_pass http://127.0.0.1:9000;
+    }
+
+    location /serviceRegistry {
+    proxy_pass http://127.0.0.1:10000;
+    }
+}

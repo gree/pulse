@@ -1,0 +1,8 @@
+Cleanup references to corp data (database names...)
+Remove references to pulse.*****.com -> make generic
+Add MIT License
+Add README.md
+Compile a list of authors/contributers
+Compile a list of software used (along with their respective licenses)
+Remove node modules (if possible) and add each module along with version number to a node package file
+Licenses for .png files?

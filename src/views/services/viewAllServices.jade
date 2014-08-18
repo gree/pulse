@@ -1,0 +1,87 @@
+h1 Services - All
+
+!=partial('nav_bar')
+
+table.services(id="service_table")
+    thead
+        tr
+            th(title="click here to sort") State
+            th(title="click here to sort") Service
+            th(title="click here to sort") # of Healthchecks
+            th Errors
+            th
+                image#expandAlldetails.arrow(src="images/plus.png")
+            th(width = "140px",title="click here to sort") Time Created
+            th(width = "140px",title="click here to sort") Time Modified
+            th(width = "50px")
+            th(width = "70px")
+    tbody
+        - each service in services
+            - if (service.state == 2)
+                - type = "master"
+            - else
+                - type = undefined
+            
+            tr.hoverable(class=type)
+                td
+                    - if (service.state == 2)
+                        image(value=service.state,class="status_image", src="images/error.png")
+                    - else if (service.state == -1)
+                        image(value=service.state,class="status_image", src="images/disabled.png")
+                    - else
+                        image(value=service.state,class="status_image", src="images/success.png")
+                td
+                    a(value=service.name,href="/healthDashboard?service_id=" + service.id)= service.name
+                td
+                    a(value=service.healthChecksCount,href="/viewServiceChecks?service_id=" + service.id)= service.healthChecksCount
+                td 
+                    = service.shortDetails
+                td
+                    - if (service.state == 2)
+                        image(class="arrow", src="images/plus.png")     
+                td= service.formattedTimeCreated
+                td= service.formattedTimeModified
+                td
+                    form(method="post",action="/viewService")
+                        input(type="hidden",value=service.id, name="id");
+                        input(type="hidden",value=service.timeCreated,name="timeCreated");
+                        input(type="hidden",value=service.timeModified,name="timeModified");
+                        input(type="hidden",value=service.name,name="name");
+                        input(type="hidden",value=service.interval,name="interval");
+                        input(type="submit",value="Edit")
+                td 
+                    - if (service.state == -1)
+                        form(method="post",action="/enableService")
+                            input(type="hidden",value=service.id, name="id");
+                            input(type="submit",value="Enable", onClick="return confirm('Are you sure you want to enable the service, #{service.name}?')")
+                    - else
+                        form(method="post",action="/disableService")
+                            input(type="hidden",value=service.id, name="id");
+                            input(type="submit",value="Disable", onClick="return confirm('Are you sure you want to disable the service, #{service.name}?')")
+
+            tr.details
+                td(colspan="100")
+                    != service.stateDetails
+                    
+br
+a(href="/viewService?action=add") Add Service
+= " - "
+a(href="/viewCheck?action=add") Add Health Check
+= " - "
+a(href="/viewTemplates") Manage Templates
+
+script(type='text/javascript')
+    var TSort_Data = TSort_Data = new Array ('service_table', 'i', 's', 'i', '','','d','d');
+    tsRegister();
+    window.onload = function addRefresh() {
+    
+        var meta;
+        if (document.createElement && (meta = document.createElement('meta'))) {
+            // set properties
+            meta.httpEquiv = "Refresh";
+            meta.content = "600"; // Set Refresh Interval in seconds
+
+            // now add the meta element to the head
+            document.getElementsByTagName('head').item(0).appendChild(meta);
+        }
+    }

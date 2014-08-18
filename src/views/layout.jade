@@ -1,0 +1,120 @@
+!!! 5
+html
+    head
+        //title!=title
+        link(rel="stylesheet", href="/css/style.css")
+        link(rel="shortcut icon", href="favicon.ico")
+        script(type="text/javascript", src="/javascript/jquery-1.7.1.min.js")
+        script(type="text/javascript", src="/javascript/autoresize.jquery.js")
+        script(type="text/javascript", src="/javascript/yahoo-min.js")
+        script(type="text/javascript", src="/javascript/json-min.js")
+        script(type="text/javascript", src="/javascript/gs_sortable.js")
+        script(type="text/javascript")
+            function showAlert(text) {
+                $("#alertbar").hide();
+                $("#alertbar").text(text);
+                $("#alertbar").fadeIn();
+            }
+            function hideAlert() {
+                $("#alertbar").hide();
+                $("#alertbar").text("");
+                $("#alertbar").fadeOut();
+            }
+            
+            // Setup Accordian, function to be called after sorting details
+            
+            function setupAccordian(){
+                
+                var collapse_img = "/images/minus.png";
+                var expand_img = "/images/plus.png";
+
+                $("tr.master").click(function() {
+                    var detail_row = $(this).nextUntil("tr:not(.details)");
+                    if (detail_row.is(':hidden')) {
+                        detail_row.fadeIn('fast');
+                        $(this).find(".arrow").attr('src', collapse_img);
+                    } else {
+                        detail_row.fadeOut('fast');
+                        $(this).find(".arrow").attr('src', expand_img);
+                    }
+                });
+            }
+            
+            $(document).ready(function() {
+            
+                // Setup Autoresizing text area
+                $('textarea.autoresize').autoResize({
+                    // On resize:
+                    onResize : function() {
+                        $(this).css({opacity:0.8});
+                    },
+                    // After resize:
+                    animateCallback : function() {
+                        $(this).css({opacity:1});
+                    },
+                    // Quite slow animation:
+                    animateDuration : 300,
+                    // More extra space:
+                    extraSpace : 20
+                });
+
+                // Setup Accordian
+                
+                var collapse_img = "/images/minus.png";
+                var expand_img = "/images/plus.png";
+
+                $("tr.master").click(function() {
+                    var detail_row = $(this).nextUntil("tr:not(.details)");
+                    if (detail_row.is(':hidden')) {
+                        detail_row.fadeIn('fast');
+                        $(this).find(".arrow").attr('src', collapse_img);
+                    } else {
+                        detail_row.fadeOut('fast');
+                        $(this).find(".arrow").attr('src', expand_img);
+                    }
+                });
+                
+                if ($("tr.master").size() == 0) {
+                    // There are no details to expand so remove
+                    $("#expandAlldetails").remove();
+                }
+                
+                // Setup Expand All Button
+                $("#expandAlldetails").parent().parent().click(function() {
+                    if ($("tr.master").size() == 0) {
+                        // There are no details to expand
+                        return;
+                    }
+                    
+                    var isExpanded = false;
+                    if ($("#expandAlldetails").attr("src") == expand_img) {
+                        $("#expandAlldetails").attr("src", collapse_img);
+                    } else {
+                        $("#expandAlldetails").attr("src", expand_img);
+                        isExpanded = true;
+                    }
+                    
+                    $("tr").each(function() {
+                        if (isExpanded) {
+                            $("tr.details").hide();
+                            if ($(this).hasClass("master")) {
+                                $(this).find(".arrow").attr('src', expand_img);
+                            }
+                        } else {
+                            if ($(this).hasClass("master")) {
+                                $(this).find(".arrow").attr('src', collapse_img);
+                            }
+                            if ($(this).prev("tr:not(.details)").hasClass("master")) {
+                                $(this).fadeIn('fast');
+                            }
+                        }
+                    });
+
+                });
+                    
+            });
+
+    body
+        #container
+            image(src="images/plus.png", width="200px", height="50px")
+            != body 

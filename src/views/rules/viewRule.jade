@@ -1,0 +1,39 @@
+form(method="post",action=action)
+    table
+        tr
+            td
+                label(for="service") Service: 
+            td
+                select(name="service")
+                    -each service in services
+                        -if(service.id==rule.service_id)
+                            option(value=service.name, selected="true")= service.name
+                        -else
+                            option(value=service.name)= service.name
+        tr
+            td
+                label(for="ruleName") Rule Type: 
+            td
+                input(type="text",name="ruleName",value=rule.ruleName)
+        tr
+            td
+                label(for="ruleValue") Rule Value:
+            td
+                input(type="text", name="ruleValue", value=rule.value)
+        tr
+            td
+                label(for="ruleType") Rule Type: 
+            td
+                select(name="ruleType")
+                    option(value="value") Value
+                    - if (rule.ruleType=="heartbeat")
+                        option(value="heartbeat", selected="true") Heartbeat
+                    - else 
+                        option(value="heartbeat") Heartbeat
+    input(type="hidden", name="id", value=rule.id)
+    input(type="hidden", name="timeCreated", value=rule.timeCreated)
+    input(type="submit", name="submit");
+
+
+
+

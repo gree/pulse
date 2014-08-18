@@ -1,0 +1,717 @@
+- if (action == "add")
+    h1 Add Health Check
+- else
+    h1 Edit Health Check
+    
+!=partial('nav_bar')
+
+p#healthCheckDescription
+
+form(method="post", action="/editCheck")
+    table.HealthCheckForm
+        tr
+            td(class='label-column', title="Select Service")
+                label(for="service") Service: 
+            td(class='input-column')
+                select#service_name(name="service_id")
+                    - each service in services
+                        - if (service.status != "disabled" || service.id == check.service_id)
+                            - if (service.id==check.service_id)
+                                option(value=service.id, selected="true")= service.name
+                            - else
+                                option(value=service.id)= service.name
+
+        tr
+            td.label-column
+                label(for="checkName", title="Select Healthcheck Type") Health Check Type: 
+            td.input-column
+                - if (action == "add")
+                    - var disabledChecktype = undefined
+                - else
+                    - var disabledChecktype = "disabled"
+                select#health_check_type(name="check_type", disabled=disabledChecktype)
+                    - for (var check_type in check_types)
+                        - if (check.check_type == check_type)
+                            option(value=check_type, selected="true")= check_types[check_type].displayName
+                        - else
+                            option(value=check_type)= check_types[check_type].displayName
+                            
+        tr
+            td(class='label-column', title="Enter Healthcheck Name")
+                label#label_health_check_name(for="checkname") Name:
+            td(class='input-column')
+                input#health_check_name(type="text", name="name", size="60", value=check.name)
+                                
+        tr
+        
+            td(class='label-column', title="Every Period seconds, the healthcheck will run")
+                label#label_health_check_period(for="period") Check Period (s):
+            td(class='input-column')
+                input#health_check_period(type="text", name="period", value=check.period)
+        //- if(check.check_type == 0)
+        tr
+            td(class='label-column', title="Click to use a config")
+                label#label_use_config(for="use_config") Use Config:
+            td(class='input-column')
+                input#use_config(type="checkbox", name="use_config")
+                select#config_type(name="config_type")
+                select#service_groups(type="hidden", name="service_groups")        
+        tr
+            td(class='label-column', title="Don't enter anything if using config")
+                label#label_health_check_property(for="property") Hostnames:
+            td(class='input-column')
+                - if (businessintelligence && businessintelligence.lowervaluebound)
+                    - if (check.property == "10.10.9.233:5433:cc_dw_ios:bi_alerts_pulse")
+                        - var bi_vert58 = 'TRUE';
+                    - if (check.property == "127.0.0.1:5433:test:dbadmin")
+                        - var bi_localhost = 'TRUE';
+                    - if (check.property == "vert-dev:5433:test:dbadmin")
+                        - var bi_vertdev = 'TRUE';
+                    - if (check.property == "10.77.57.252:5433:cc_dw_ios:bi_alerts_pulse")
+                        - var bi_vert53 = 'TRUE';
+                select.health_check_bi#health_check_bi_database_list(name="bi_database")
+                    option(value="10.10.9.233:5433:cc_dw_ios:bi_alerts_pulse", selected=bi_vert58) vertica-5-8
+                    option(value="10.77.57.252:5433:cc_dw_ios:bi_alerts_pulse", selected=bi_vert53) vertica-5-3
+                    option(value="vert-dev:5433:test:dbadmin", selected=bi_vertdev) vert-dev
+                    option(value="127.0.0.1:5433:test:dbadmin", selected=bi_localhost) 127.0.0.1
+                textarea#health_check_property(class="autoresize", rows="1", cols="100", name="property")= check.property
+
+        tr
+            td(class='label-column', title="Dynamic configs")
+                label#label_health_check_dynamic(for="dynamic_config") Config Servers:
+            td(class='input-column')
+                textarea#health_check_dynamic(class="autoresize", rows="1", cols="100", name="dynamic_config", disabled="disabled")= check.dynamic_config
+                    
+        tr    
+            td(class='label-column', title="Path to the server")
+                label#label_health_check_path(for="path") Check Path:
+            td(class='input-column')
+                textarea#health_check_path(class="autoresize", rows="1", cols="80", name="path")= check.path
+        tr
+            td(class='label-column', title="Contact details (email or cell number) comma separated")
+                label#label_health_check_email(for="email") Email:
+            td(class='input-column')
+                textarea#health_check_email(class="autoresize", rows="1", cols="80", name="email")= check.email
+
+        tr
+            td(class='label-column', title="Expected Response")
+                label#label_health_check_value(for="checkValue") Value:
+            td(class='input-column')
+                select#value_operator(name="operator")
+                    option(value="=") =
+                    option(value="<") <
+                    option(value=">") >
+                textarea#health_check_value(class="autoresize", rows="1", cols="80", name="value" )= check.value
+
+
+                - var bi_lowerbound = '';
+                - var bi_upperbound = '';
+                - if (businessintelligence && businessintelligence.lowervaluebound)
+                    bi_lowerbound = businessintelligence.lowervaluebound.value;
+                    bi_upperbound = businessintelligence.uppervaluebound.value
+                    -if (businessintelligence.lowervaluebound.isQuery == 'TRUE')
+                        - var bi_lChecked = 'TRUE'
+                    -if (businessintelligence.uppervaluebound.isQuery == 'TRUE')
+                        - var bi_uChecked = 'TRUE'
+                label.health_check_bi#label_health_check_bi_lowerbound_isquery(for="bi_lowerbound_isquery") isQuery:
+                input.health_check_bi#health_check_bi_lowerbound_isquery(type='checkbox', name='bi_lowerbound_isquery', value='TRUE', checked=bi_lChecked)
+            
+                label.health_check_bi#label_health_check_bi_lowerbound(for="bi_lowerbound") Lowerbound:
+                textarea.health_check_bi#health_check_bi_lowerbound(class="autoresize", rows="1", cols="100", name="bi_lowerbound")= bi_lowerbound
+
+        tr
+            td(class='label-column')
+            td(class='input-column')
+
+                label.health_check_bi#label_health_check_bi_upperbound_isquery(for="bi_upperbound_isquery") isQuery:
+                input.health_check_bi#health_check_bi_upperbound_isquery(type='checkbox', name='bi_upperbound_isquery', value='TRUE', checked=bi_uChecked)
+
+                label.health_check_bi#label_health_check_bi_upperbound(for="bi_upperbound") Upperbound:
+                textarea.health_check_bi#health_check_bi_upperbound(class="autoresize", rows="1", cols="100", name="bi_upperbound")= bi_upperbound
+
+        tr
+            td(class='label-column', title="Wait for this much time before sending a fail email")
+                label#label_health_check_notificationDelay(for="path") Notification Delay (s):
+            td(class='input-column')
+                input#health_check_notificationDelay(type="text", name="notificationDelay", size="60", value=check.notificationDelay)
+        tr
+            td.label-column
+                label(for="dependent_checks", title="select multiple dependent checks, mac users use command key for multiselect") Dependent On
+            td.input-column
+                select#dependent_checks(multiple="multiple", name="dependent_checks", title="select multiple dependent checks, mac users use command key for multiselect")
+                    - if(typeof check.dependent_checks == "string")
+                        option(value=check.dependent_checks, selected=true)
+                    - else
+                        - for(var x in check.dependent_checks)
+                            option(value=check.dependent_checks[x], selected=true)
+        tr
+            td.label-column
+                label(for="email_template", title="select an email template, if blank default will be used") Email Template
+            td.input-column
+                select#email_template(name="email_template", title="select an email template, if blank default will be used")
+                    option(value=0)
+                    - var selected = false;
+                    - for(var x in templates)
+                        - if(templates[x].id == check.email_template)
+                            - selected = true
+                        - else
+                            - selected = false
+                        - if(templates[x].type == "EmailTemplate")
+                            option(value=templates[x].id,selected=selected)= templates[x].name
+        tr
+            td.label-column
+                label(for="sms_template", title="select an sms template, if blank default will be used") Sms Template
+            td.input-column
+                select#sms_template(name="sms_template", title="select an sms template, if blank default will be used")
+                    option(value=0)
+                    - var selected = false;
+                    - for(var x in templates)
+                        - if(templates[x].id == check.sms_template)
+                            - selected = true
+                        - else
+                            - selected = false
+                        - if(templates[x].type == "SmsTemplate")
+                            option(value=templates[x].id,selected=selected)= templates[x].name
+            
+                       
+    input#check_id(type="hidden", name="id", value=check.id)
+    input#user_action(type="hidden", name="action", value=action)
+    input(type="hidden", name="timeCreated", value=check.timeCreated)
+    input#referrer(type="hidden", name="referrer")
+    input(type="submit", name="submit", value="Submit", onclick="return validateHealthCheckCreation();");
+    - if (action == "edit")
+        - if (services[check.service_id].status != "disabled")
+            - var disabledbutton = undefined
+        - else
+            - var disabledbutton = "disabled"
+        - if (check.status == "disabled")
+            - var buttonValue = "Enable"
+        - else
+            - var buttonValue = "Disable"
+        input#copy_button(type="submit", name="copy", value="Create a Copy", onclick="return updateAction('copy', confirm('Are you sure you want to copy the check #{check.name}?'));")
+        input#copy_service_id(type="hidden", name="copy_service_id", value=check.service_id)
+        - if(services[check.service_id])
+            - var copyValue=services[check.service_id].status
+        - else
+            - var copyValue= undefined
+        input#copy_service_status(type="hidden", name="copy_service_status", value=copyValue))
+        input#disable_button(type="submit", value=buttonValue,disabled=disabledbutton, onClick="return updateAction('remove', confirm('Are you sure you want to #{buttonValue} the check #{check.name}?'));")
+    
+script(type='text/javascript')
+    var checkTypeDisplayDictionary = !{json_check_types};
+    $("#referrer").val($(document)[0].referrer);
+    
+    if($("#copy_service_status").val() == "disabled"){
+        $("#copy_button").attr('disabled',true);
+    }
+    var serviceGroups = undefined;
+    var db_configs = undefined;
+    var app_configs = undefined;
+    loadServiceGroups();
+    var dependent_checks_list = undefined;
+    
+    loadDependentChecksList();
+    
+    function loadDependentChecksList(){
+        if(!dependent_checks_list){
+            dependent_checks_list = fetchDependentChecksList();
+        }
+        fillDependentChecksList(dependent_checks_list);
+    }
+
+    function loadServiceGroups(){
+        if($('#health_check_type').val() == 'ServerHealthCheck'){
+            fillConfigTypes('db_config')
+            serviceGroups = fetchServiceGroups('db_config');
+            fillServiceGroups(serviceGroups);
+            db_configs = fetchDbConfigs();
+            if($('#health_check_property').val().indexOf('db_config') != -1){
+                $('#config_type').val('db_config');
+                $('#use_config').attr('checked',true);
+                var propertySplit = $('#health_check_property').val().split(':');
+                if(propertySplit.length >= 2){
+                    $('#service_groups').val(propertySplit[1]);
+                    $('#service_groups').show();
+                }
+            }
+            else{
+                $('#config_type').hide();
+                $('#service_groups').hide();
+                $('#health_check_dynamic').hide();
+                $('#label_health_check_dynamic').hide();
+            }
+        }
+        else if($('#health_check_type').val() == 'DatabaseHealthCheck'
+             || $('#health_check_type').val() == 'MemcacheHealthCheck'){
+             fillConfigTypes('app_config')
+             app_configs = fetchAppConfigs('app_config');
+             fillAppConfigs(app_configs);
+             if($('#health_check_property').val().indexOf('app_config') != -1){
+                $('#config_type').val('app_config');
+                $('#use_config').attr('checked',true);
+                var propertySplit = $('#health_check_property').val().split(':');
+                if(propertySplit.length >= 2){
+                    $('#service_groups').val(propertySplit[1]);
+                    $('#service_groups').show();
+                }
+            }
+            else{
+                $('#config_type').hide();
+                $('#service_groups').hide();
+                $('#health_check_dynamic').hide();
+                $('#label_health_check_dynamic').hide();
+            }
+        }
+        else{
+            $('#use_config').attr('checked', false);
+            $('#config_type').hide();
+            $('#service_groups').hide();
+            $('#use_config').attr('disabled', true);
+            $('#health_check_dynamic').hide();
+            $('#label_health_check_dynamic').hide();
+            $('#use_config').hide();
+            $('#label_use_config').hide();
+        }
+    }
+    
+    function updateAction(action,confirm){
+        if(!confirm){
+            return false;
+        }
+        if(action == 'copy'){
+            confirm = validateHealthCheckCreation();
+        }
+        if(confirm == true){
+            $("#user_action").val(action);
+        }
+        return confirm;
+    }
+    
+    function updateCopyButton(){ 
+        var service_id = $("#copy_service_id").val();
+        var service_status = $("#copy_service_status").val();
+        if($("#service_name").val() == service_id){
+            if(service_status == "disabled"){
+                $("#copy_button").attr('disabled',true);
+            }
+            else{
+                $("#copy_button").attr('disabled',false);
+                $("#disable_button").attr('disabled',false);
+            }
+        }
+        else{
+            $("#copy_button").attr('disabled',false);
+            $("#disable_button").attr('disabled',true);
+        }
+    }
+    
+    function updateForm() {
+        var healthCheckType = $('#health_check_type :selected').val();
+        
+        var healthCheckDisplay = checkTypeDisplayDictionary[healthCheckType];
+        if (healthCheckDisplay !== undefined) {
+            $("#healthCheckDescription").text(healthCheckDisplay.description);
+            
+            // Change Form Labels
+            setupInputField("#label_health_check_name", healthCheckDisplay.name);
+            setupInputField("#label_health_check_value", healthCheckDisplay.value);
+            setupInputField("#label_health_check_period", healthCheckDisplay.period);
+            setupInputField("#label_health_check_property", healthCheckDisplay.property);
+            setupInputField("#label_health_check_dynamic", healthCheckDisplay.dynamic_config);
+            setupInputField("#label_health_check_path", healthCheckDisplay.path);
+            setupInputField("#label_health_check_email", healthCheckDisplay.email);
+            setupInputField("#label_health_check_notificationDelay", healthCheckDisplay.notificationDelay);
+            
+            // Setup different form for value comparisons
+            if (healthCheckType == "DatabaseHealthCheck" || healthCheckType == "VerticaHealthCheck") {
+                $("#value_operator").show();
+            } else {
+                $("#value_operator").hide();
+            }
+
+            // if healthCheck is Business Intelligence, then modify value to have multiple options
+            if(healthCheckType == "BusinessIntelligenceCheck") {
+                $(".health_check_bi").show();
+                $("#health_check_value").hide();
+                $("#value_operator").hide();
+                //var html = "<input id='health_check_bi_property' type='text' name='bi_property' size='100' class='health_check_bi'>";
+                //$("#health_check_property").parent().html(html);
+                $("#health_check_property").hide();
+                //$("#health_check_period").val('900');
+            } else {
+                $(".health_check_bi").hide();
+                $("#health_check_value").show();
+                //var html = "<input id='health_check_property' type='text' name='property' size='100'>";
+                //$("#health_check_bi_property").parent().html(html);
+                $("#health_check_property").show();
+                //$("#health_check_period").val('60');
+                clearBIFields();
+            }
+        }
+    }
+
+    // if you change health_check types away from BI, remove BI data (and as a
+    // result, the validation checks)
+    function clearBIFields(){
+        $("#health_check_bi_lowerbound").val('');
+        $("#health_check_bi_upperbound").val('');
+        $("#health_check_bi_property").val('');
+        
+    }
+    
+    function setupInputField(id, text) {
+        $(id).text(text + ":");
+        if (text === undefined) {
+            $(id).parents("tr").hide();
+        } else {
+            $(id).parents("tr").fadeIn();
+        }
+    }
+    
+    
+    $(document).ready(function() {
+        var healthCheckType = $('#health_check_type').children(":selected").val();
+        if (healthCheckType == "DatabaseHealthCheck" || healthCheckType == "VerticaHealthCheck") {
+            // If we are editing a check
+            if (#{check.id} != 0) { 
+                // Convert Existing Value for values with an operator
+                var check_value = $("#health_check_value").val();
+                
+                var operator = '=';
+                var value = check_value || "1";
+                if (check_value.charAt(0) === '<' || check_value.charAt(0) === '>' || check_value.charAt(0) === '=') {
+                    operator = check_value.charAt(0);
+                    value = check_value.substring(1);
+                }
+                
+                $("#health_check_value").val(value);
+                
+                // Select the correct operator
+                $("#value_operator option[selected]").removeAttr("selected");
+                $("#value_operator option[value='" + operator + "']").attr("selected", "selected");
+            }
+        }
+        
+        updateForm();
+    });
+    
+    function fillServiceGroups(data){
+        $('#service_groups').find('option').remove().end();
+        if(!data)
+            return;
+        
+        for(x in data){
+            $('#service_groups').append($('<option></option>').attr('value',data[x]).text(data[x]));
+        }
+    }
+    
+    function fillAppConfigs(data){
+        $('#service_groups').find('option').remove().end();
+        if(!data)
+            return;
+        
+        for(x in data){
+            $('#service_groups').append($('<option></option>').attr('value',x).text(x));
+        }
+    }
+    
+    function fillDependentChecksList(dependent_checks){
+        var selected = $('#dependent_checks').val();
+        var selectedObj = {};
+        for(var x in selected){
+            selectedObj[selected[x]] = selected[x];
+        }
+        $('#dependent_checks').find('option').remove().end();
+        dependent_checks = dependent_checks[$('#service_name').val()];
+        if(!dependent_checks)
+            return;
+        for(x in dependent_checks){
+            var option = $('<option></option>').attr('value',dependent_checks[x].id).text(dependent_checks[x].name);
+            if(selectedObj[dependent_checks[x].id]){
+                option.attr('selected',true);
+            }
+            $('#dependent_checks').append(option);
+        }
+        $('#dependent_checks').attr('size', dependent_checks.length);
+        $('#dependent_checks').autoResize();
+    }
+    
+    function fetchDependentChecksList(){
+        var output = jQuery.ajax({
+            url:    'http://localhost/fetchConfigs',
+            type: 'POST',
+            data: '&action=dependent_checks&check_id='+$('#check_id').val(),
+            async:   false
+        }).responseText;
+        return JSON.parse(output);
+    }
+    
+    function fetchServiceGroups(config_type){
+        var output = jQuery.ajax({
+            url:    'http://localhost/fetchConfigs',
+            type: 'POST',
+            data: 'config_type='+config_type+'&action=service_groups',
+            async:   false
+        }).responseText;
+        return JSON.parse(output);
+    }
+    
+    function fetchAppConfigs(config_type){
+        var output = jQuery.ajax({
+            url:    'http://localhost/fetchConfigs',
+            type: 'POST',
+            data: 'config_type='+config_type+'&action=app_configs&service_id='+$('#service_name').val(),
+            async:   false
+        }).responseText;
+        return JSON.parse(output);
+    }
+    
+
+    function fetchDbConfigs(){
+        var output = jQuery.ajax({
+            url:    'http://localhost/fetchConfigs',
+            type: 'POST',
+            data: 'config_type=db_config&action=db_config',
+            async:   false
+        }).responseText;
+        return JSON.parse(output);
+    }
+    
+    function fillDynamicAppConfigs(app_config){
+        $('#health_check_dynamic').val('');
+        for(var x in app_config){
+            $('#health_check_dynamic').val($('#health_check_dynamic').val() + app_config[x] + ",\\n");
+        }
+        $('#health_check_dynamic').change();
+    }
+    
+    function fillDynamicDbConfigs(db_config){
+        $('#health_check_dynamic').val('');
+        for(var x in db_config){
+            $('#health_check_dynamic').val($('#health_check_dynamic').val() + db_config[x] + ",\\n");
+        }
+        $('#health_check_dynamic').change();
+    }
+    
+    function fillConfigTypes(configType){
+        $('#config_type').find('option').remove().end();
+        $('#config_type').append($('<option></option>').attr('value',"").text(""));
+        $('#config_type').append($('<option></option>').attr('value',configType).text(configType));
+        $('#config_type').change();
+    }
+    
+    $('#health_check_type').change(function () {
+        if($('#health_check_type').val() != 'ServerHealthCheck' && $('#health_check_type').val() != 'DatabaseHealthCheck'
+             && $('#health_check_type').val() != 'MemcacheHealthCheck'){
+            $('#use_config').attr('checked', false);
+            $('#use_config').attr('disabled', true);
+            $('#use_config').change();
+            $('#use_config').hide();
+            $('#label_use_config').hide();
+        }
+        else{
+            if($('#health_check_type').val() == 'ServerHealthCheck'){
+                fillConfigTypes('db_config');
+            }
+            else{
+                fillConfigTypes('app_config');
+            }
+            
+            $('#use_config').attr('disabled', false);
+            $('#use_config').attr('checked',false);
+            $('#use_config').change();
+            $('#use_config').show();
+            $('#label_use_config').show();
+        }
+        updateForm();
+    });
+    
+    $('#use_config').change(function () {
+        if($('#use_config').is(':checked')){
+            $('#config_type').change();
+            $('#config_type').show();
+            $('#health_check_dynamic').show();
+            $('#label_health_check_dynamic').show();
+        }
+        else{
+            $('#config_type').val('');
+            $('#config_type').hide();
+            $('#config_type').change();
+        }
+    });
+    
+    $('#config_type').change(function () {
+        if($('#config_type').val() == 'db_config'){
+            if(!serviceGroups){
+                serviceGroups = fetchServiceGroups('db_config');
+            }
+            fillServiceGroups(serviceGroups);
+            
+            if(!db_configs){
+                db_configs = fetchDbConfigs();
+            }
+            $('#service_groups').show();
+            $('#health_check_property').val($('#config_type').val()+':'+$('#service_groups').val());
+            fillDynamicDbConfigs(db_configs[$('#service_groups').val()]);
+        }
+        else if($('#config_type').val() == 'app_config'){
+            if(!app_configs){
+                app_configs = fetchAppConfigs('app_config');
+            }
+            fillAppConfigs(app_configs);
+            $('#service_groups').show();
+            $('#health_check_property').val($('#config_type').val()+':'+$('#service_groups').val());
+            fillDynamicAppConfigs(app_configs[$('#service_groups').val()]);
+        }
+        else{
+            $('#service_groups').hide();
+            $('#health_check_property').val('');
+            $('#health_check_dynamic').val('');
+            $('#health_check_dynamic').hide();
+            $('#label_health_check_dynamic').hide();
+        }
+    });
+    
+    $('#service_groups').change(function () {
+        $('#health_check_property').val($('#config_type').val()+':'+$('#service_groups').val());
+        if($('#config_type').val() == 'db_config'){
+            fillDynamicDbConfigs(db_configs[$('#service_groups').val()]);
+        }
+        else if($('#config_type').val() == 'app_config'){
+            fillDynamicAppConfigs(app_configs[$('#service_groups').val()]);
+        }
+    });
+    
+    $('#service_name').change(function () {
+        updateCopyButton();
+        app_configs = undefined; // so that new app config is fetched next time we try to update the drop down menu
+        $('#use_config').attr('checked',false);
+        $('#use_config').change();
+        loadDependentChecksList();
+    });
+
+    // check for insert, delete, drop, and update
+    function isValidQuery(str) {
+        if(str.search(/insert/i) == -1 && str.search(/delete/i) == -1 && str.search(/drop/i) == -1 && str.search(/update/i) == -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    function checkVerticaQuery(dbConnectionString,query) {
+        var output = jQuery.ajax({
+            url:    'http://localhost/isValidVerticaQuery',
+            type: 'POST',
+            data: 'action=processQuery&query='+query+'&dbConnectionString='+dbConnectionString,
+            async:   false
+        }).responseText;
+        return output;
+    }
+
+    function validateHealthCheckCreation() {
+        var name = $("#health_check_name").val();
+        var property = $("#health_check_property").val();
+        var period = parseInt($("#health_check_period").val());
+        var notificationDelay = parseInt($("#health_check_notificationDelay").val());   
+        var healthCheckType = $('#health_check_type').children(":selected").val();
+        var path = $("#health_check_path").val();
+        var service = $("#service_name").val();
+        
+        if(!service || service == "" || service == undefined ){
+            showAlert("No Services to start a health check");
+            return false;
+        }
+
+
+        if (name == "" || name === undefined) {
+            showAlert("Please input a name for the health check.");
+            return false;
+        }
+
+        if(healthCheckType == "BusinessIntelligenceCheck"){
+            var dbList = $("#health_check_bi_database_list").val();
+            var dbValueQuery = $("#health_check_path").val();
+            var dbUpperBoundQuery = $("#health_check_bi_upperbound").val();
+            var dbLowerBoundQuery = $("#health_check_bi_lowerbound").val();
+            var dbUpperBoundIsQuery = $("#health_check_bi_upperbound_isquery").is(':checked'); 
+            var dbLowerBoundIsQuery = $("#health_check_bi_lowerbound_isquery").is(':checked'); 
+            
+            if(period < 900){
+                showAlert("Please input a PERIOD that is greater than 15 minutes (900 seconds).");
+                return false;
+            }
+
+            if(path == "" || path === undefined){
+                showAlert("Please input a database query for the health check.");
+                return false;
+            }
+
+            // check the queries (using javascript)
+            if (!isValidQuery($("#health_check_path").val())){
+                showAlert("Please input a valid query. Queries cannot contain modifying statements like UPDATE, INSERT, DROP, etc...");
+                return false;
+            }
+            if (dbLowerBoundIsQuery) {
+                if (!isValidQuery($("#health_check_bi_lowerbound").val())){
+                    showAlert("Please input a valid lowerbound query. Queries cannot contain modifying statements like UPDATE, INSERT, DROP, etc...");
+                    return false;
+                }
+            } else {
+                if ($("#health_check_bi_lowerbound").val() == "" || $("#health_check_bi_lowerbound").val() === undefined){
+                    showAlert("Please input a lowerbound value.");
+                    return false;
+                }
+            }
+            if (dbUpperBoundIsQuery) {
+                if (!isValidQuery($("#health_check_bi_upperbound").val())){
+                    showAlert("Please input a valid upperbound query. Queries cannot contain modifying statements like UPDATE, INSERT, DROP, etc...");
+                    return false;
+                }
+            } else {
+                if ($("#health_check_bi_upperbound").val() == "" || $("#health_check_bi_upperbound").val() === undefined){
+                    showAlert("Please input a upperbound value.");
+                    return false;
+                }
+            }
+            // check the queries by running them against vertica
+            if (checkVerticaQuery(dbList,dbValueQuery) != "success") {
+                showAlert("Value query failed against vertica.");
+                return false;
+            }
+            if (dbLowerBoundIsQuery) {
+                if (checkVerticaQuery(dbList,dbLowerBoundQuery) != "success") {
+                    showAlert("Lowerbound query failed against vertica.");
+                    return false;
+                }
+            }
+            if (dbUpperBoundIsQuery) {
+                if (checkVerticaQuery(dbList,dbUpperBoundQuery) != "success") {
+                    showAlert("Upperbound query failed against vertica.");
+                    return false;
+                }
+            }
+
+        } else {
+            if (property == "" || property === undefined) {
+                showAlert("Please input a property for the health check.");
+                return false;
+            }
+        }
+        
+        if (isNaN(period) || period == "" || period === undefined || period <= 0) {
+            showAlert("Please input a valid period in seconds.");
+            return false;
+        }
+        
+        if (isNaN(notificationDelay) || notificationDelay == "" || notificationDelay === undefined || notificationDelay <= 0) {
+            showAlert("Please input a valid delay in seconds.");
+            return false;
+        }
+        
+        // Reenable health check type
+        $("#health_check_type").removeAttr("disabled");
+        
+        return true;
+        
+    }
