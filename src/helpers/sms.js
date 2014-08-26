@@ -3,13 +3,13 @@ var rest = require('restler'),
 var logger = require("../helpers/logger").getInstance();
 
 var send = function(opt, callback) {
-    var accountSid = 'AC5bb513934ab946fc9c057d3f6e2b068e',
-        authToken = '8af75c81a2bddbf89ac6de23d6d26343',
+    var accountSid = 'account_sid',
+        authToken = 'auth_token',
         apiVersion = '2010-04-01',
         uri = '/'+apiVersion+'/Accounts/'+accountSid+'/SMS/Messages',
         host = 'api.twilio.com',
         fullURL = 'https://'+accountSid+':'+authToken+'@'+host+uri,
-        from = opt.from || '14157280386',
+        from = opt.from || 'from_number',
         to = opt.to,
         body = opt.body;
 
